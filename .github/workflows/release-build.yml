@@ -51,7 +51,7 @@ jobs:
       JUST_ENABLE_H3: true
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Override release profile lto settings
       if: inputs.CARGO_PROFILE_RELEASE_LTO
@@ -83,6 +83,16 @@ jobs:
       run: just e2e-tests
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - if: inputs.publish
+      uses: actions/download-artifact@v3
+      with:
+        name: signing-key
+        path: minisign.key.enc
+    - if: inputs.publish
+      env:
+        SIGNING_KEY_ENCRYPTION_KEY: ${{ secrets.SIGNING_KEY_ENCRYPTION_KEY }}
+      run: .github/scripts/ephemeral-sign.sh packages/cargo-binstall-*
 
     - if: inputs.publish
       name: Upload to release
@@ -117,7 +127,7 @@ jobs:
       JUST_FOR_RELEASE: true
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - uses: taiki-e/install-action@v2
       with:
@@ -139,6 +149,16 @@ jobs:
     - run: ls -shalr packages/
     - run: just repackage-lipo
     - run: ls -shal packages/
+
+    - if: inputs.publish
+      uses: actions/download-artifact@v3
+      with:
+        name: signing-key
+        path: minisign.key.enc
+    - if: inputs.publish
+      env:
+        SIGNING_KEY_ENCRYPTION_KEY: ${{ secrets.SIGNING_KEY_ENCRYPTION_KEY }}
+      run: .github/scripts/ephemeral-sign.sh packages/cargo-binstall-universal-*
 
     - if: inputs.publish
       name: Upload to release
