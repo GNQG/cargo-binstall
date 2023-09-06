@@ -91,8 +91,10 @@ jobs:
         path: minisign.key.enc
     - if: inputs.publish
       env:
-        SIGNING_KEY_ENCRYPTION_KEY: ${{ secrets.SIGNING_KEY_ENCRYPTION_KEY }}
-      run: .github/scripts/ephemeral-sign.sh packages/cargo-binstall-*
+        SIGNING_KEY_SECRET: ${{ secrets.SIGNING_KEY_SECRET }}
+      run: |
+        apt-get install -y expect
+        .github/scripts/ephemeral-sign.sh packages/cargo-binstall-*
 
     - if: inputs.publish
       name: Upload to release
@@ -154,11 +156,13 @@ jobs:
       uses: actions/download-artifact@v3
       with:
         name: signing-key
-        path: minisign.key.enc
+        path: minisign.key
     - if: inputs.publish
       env:
-        SIGNING_KEY_ENCRYPTION_KEY: ${{ secrets.SIGNING_KEY_ENCRYPTION_KEY }}
-      run: .github/scripts/ephemeral-sign.sh packages/cargo-binstall-universal-*
+        SIGNING_KEY_SECRET: ${{ secrets.SIGNING_KEY_SECRET }}
+      run: |
+        apt-get install -y expect
+        .github/scripts/ephemeral-sign.sh packages/cargo-binstall-universal-*
 
     - if: inputs.publish
       name: Upload to release

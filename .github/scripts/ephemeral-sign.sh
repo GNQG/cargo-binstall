@@ -4,14 +4,16 @@ set -euxo pipefail
 
 cargo binstall -y rsign2
 
-# TODO: decrypt minisign.key.enc > minisign.key
-
 ts=$(date --utc --iso-8601=seconds)
 git=$(git rev-parse HEAD)
 comment="gh=$GITHUB_REPOSITORY git=$git ts=$ts run=$GITHUB_RUN_ID"
 
-for file in "$@"; do
-    rsign sign -s minisign.key -x "$file.sig" -t "$comment" "$file"
+set +x
+for file in "$@"; do expect <<EXP
+spawn rsign sign -s minisign.key -x "$file.sig" -t "$comment" "$file"
+expect "Password:"
+send -- "$SIGNING_KEY_SECRET\r"
+expect eof
+EXP
 done
 
-rm minisign.key

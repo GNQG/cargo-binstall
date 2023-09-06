@@ -56,13 +56,15 @@ jobs:
     - uses: cargo-bins/cargo-binstall@main
     - name: Create ephemeral keypair
       env:
-        SIGNING_KEY_ENCRYPTION_KEY: ${{ secrets.SIGNING_KEY_ENCRYPTION_KEY }}
-      run: .github/scripts/ephemeral-gen.sh
+        SIGNING_KEY_SECRET: ${{ secrets.SIGNING_KEY_SECRET }}
+      run: |
+        apt-get install -y expect
+        .github/scripts/ephemeral-gen.sh
     - name: Upload secret key to artifact
       uses: actions/upload-artifact@v3
       with:
         name: signing-key
-        path: minisign.key.enc
+        path: minisign.key
         if-no-files-found: error
         retention-days: 1
     - name: Publish to crates.io
